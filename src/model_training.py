@@ -1,6 +1,7 @@
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from imblearn.over_sampling import SMOTE
+import xgboost as xgb
 import xgboost
 import pandas
 import pickle
@@ -29,17 +30,17 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, rando
 balanced = SMOTE(random_state=42)
 X_train, y_train = balanced.fit_resample(X_train, y_train)
 
-model = xgboost.XGBClassifier(
+model = xgb.XGBClassifier(
     objective="binary:logistic",
     random_state=42,
-    max_depth=3,  # Você pode aumentar isso gradualmente, por exemplo, 3, 4, 5...
-    colsample_bytree=0.8,  # Valor típico, ajuste conforme necessário
-    min_child_weight=1,  # Valor típico, ajuste conforme necessário
-    gamma=0,  # Comece com 0 e ajuste conforme necessário
-    eta=0.1,  # Taxa de aprendizado, ajuste conforme necessário
-    n_estimators=100,  # Comece com 100 e aumente se necessário
-    use_label_encoder=False,  # Para evitar um aviso de descontinuação
-    eval_metric='logloss',  # Métrica de avaliação apropriada para classificação binária
+    max_depth=6,
+    colsample_bytree=0.8,
+    min_child_weight=1,
+    gamma=1.0,
+    eta=0.001,
+    n_estimators=300,
+    use_label_encoder=False,
+    eval_metric='logloss'
 )
 
 
