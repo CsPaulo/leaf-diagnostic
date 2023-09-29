@@ -1,45 +1,53 @@
 import mahotas
-import pandas
-import numpy
+import pandas as pd
+import numpy as np
 import glob
 import cv2
+import os
 
-labels = ['Healthy', 'Powdery_Mildew']
+# Nome das pastas
+labels = ['Healthy', 'Gall_Midge']
 
-features_list = list()
+# Lista que armazena as características
+features_list = []
 
+# Função para calcular as características e adicioná-las à lista
+def extract_features(image_path, label):
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    img = cv2.resize(img, (256, 256))
+
+    features_img = mahotas.features.haralick(img, compute_14th_feature=True, return_mean=True)
+    features_img = np.append(features_img, label)
+
+    return features_img
+
+# Loop das pastas e imagens
 for label in labels:
-    
-    path = './images/' + label
+    path = f'C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/images/{label}'
 
-    images_list = glob.glob(path + '/*.jpg')
+    if not os.path.exists(path):
+        print(f"A pasta '{path}' não existe.")
+        continue
+
+    images_list = glob.glob(os.path.join(path, '*.jpg'))
+
+    if not images_list:
+        print(f"Nenhuma imagem encontrada em '{path}'.")
+        continue
+
+    label_mapping = {'Healthy': 0, 'Gall_Midge': 1}
+    label_value = label_mapping.get(label, -1)
 
     for image_path in images_list:
+        features = extract_features(image_path, label_value)
+        features_list.append(features)
 
-        img = cv2.imread(image_path, 0)
-
-        if img.shape[-1] == 3:
-            img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        else:
-            img_gray = img
-
-        img_gray = cv2.resize(img_gray, (256, 256))
-
-        label = 1 if 'Healthy' in image_path else 0
-
-        features_img = mahotas.features.haralick(img, compute_14th_feature = True, return_mean = True)
-
-        features_img = numpy.append(features_img, label)
-
-        features_list.append(features_img)
-
+# Nomes das características
 features_names = mahotas.features.texture.haralick_labels
+features_names = np.append(features_names, 'Label')
 
-features_names = numpy.append(features_names, 'Label')
+# DataFrame e salvar ele como CSV
+df = pd.DataFrame(data=features_list, columns=features_names)
 
-df = pandas.DataFrame(data = features_list, columns = features_names)
-
-df.to_csv('./etc/features.csv', index = False, sep = ';')
-
-    
-
+output_path = 'C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/features.csv'
+df.to_csv(output_path, index=False, sep=';')
