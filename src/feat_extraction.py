@@ -11,7 +11,7 @@ labels = ['Healthy', 'Gall_Midge']
 # Lista que armazena as características
 features_list = []
 
-# Função para calcular as características e adicioná-las à lista
+# Função para calcular as características e adiciona-las a lista
 def extract_features(image_path, label):
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     img = cv2.resize(img, (256, 256))

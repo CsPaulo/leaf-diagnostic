@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 def get_model():
     return pickle.load(open('C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/best_random_forest_model.dat', 'rb'))
 
-# Função para converter dados de bytes para imagem
+# Função para converter dados da imagem
 def convert_byteio_image(string):
     array = np.frombuffer(string, np.uint8)
     image = cv2.imdecode(array, flags=1)
@@ -34,20 +34,22 @@ st.markdown("<h1 style='text-align: center; color: black;'>Aplicação web para 
 st.sidebar.title('Configurações')
 uploaded_image = st.sidebar.file_uploader("Escolha a imagem", type='jpg', accept_multiple_files=False)
 
-# Carregar o modelo
+
 model = get_model()
 
-# Verificar se a imagem foi carregada
+
 if uploaded_image is not None:
     bytes_data = uploaded_image.getvalue()
     image = convert_byteio_image(bytes_data)
 
-    # redimensiona a imagem
+
     if (image.shape != (256, 256)):
         image = cv2.resize(image, (256, 256))
 
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
     # Extrair características da imagem
-    features = mahotas.features.haralick(image, compute_14th_feature=True, return_mean=True).reshape(1, 14)
+    features = mahotas.features.haralick(gray_image, compute_14th_feature=True, return_mean=True).reshape(1, 14)
 
     # Fazer previsões
     prediction_probs = model.predict_proba(features)
@@ -56,7 +58,7 @@ if uploaded_image is not None:
     # Exibir imagem e previsões
     st.markdown("<h3 style='text-align: center; color: black;'>Imagem</h3>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([0.2, 5, 0.2])
-    col2.image(image, use_column_width=True)
+    col2.image(gray_image, use_column_width=True)
     st.markdown("<h4 style='text-align: center; color: black;'>" + prediction + "</h4>", unsafe_allow_html=True)
 
     # Botão para exibir interpretação
