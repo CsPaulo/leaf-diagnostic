@@ -39,16 +39,22 @@ def interpret_and_display_predictions(model, image, features):
     exp = explainer.explain_instance(features.reshape(14,), model.predict_proba, num_features=14)
     
     st.image(image, caption="", use_column_width=True)
-    st.markdown("<h3 style='text-align: center; color: black;'>Interpretação</h3>", unsafe_allow_html=True)
     
-    components.html((exp.as_html(predict_proba=False)), height=500)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        
+
+    with col2:
+        st.markdown("<h3 style='text-align: center; color: black;'>Interpretação</h3>", unsafe_allow_html=True)
+        components.html((exp.as_html(predict_proba=False)), height=500)
 
 # título 
 st.markdown("<h1 style='text-align: center; color: black;'>Aplicação de Diagnóstico de Folhas</h1>", unsafe_allow_html=True)
 
 # barra lateral para upload de imagens
 st.sidebar.title('Configurações')
-uploaded_images = st.sidebar.file_uploader("Escolha ate 10 imagens (JPG ou JPEG)", type=['jpg', 'jpeg'], accept_multiple_files=True, key="upload_images")
+uploaded_images = st.sidebar.file_uploader("Escolha até 10 imagens (JPG ou JPEG)", type=['jpg', 'jpeg'], accept_multiple_files=True, key="upload_images")
 
 model = get_model()
 

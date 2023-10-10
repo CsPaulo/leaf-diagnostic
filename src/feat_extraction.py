@@ -5,13 +5,13 @@ import glob
 import cv2
 import os
 
-# Nome das pastas
+
 labels = ['Healthy', 'Gall_Midge']
 
-# Lista que armazena as características
+# armazena as características
 features_list = []
 
-# Função para calcular as características e adiciona-las a lista
+# calcular as características e adiciona-las a lista
 def extract_features(image_path, label):
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     img = cv2.resize(img, (256, 256))
@@ -21,7 +21,7 @@ def extract_features(image_path, label):
 
     return features_img
 
-# Loop das pastas e imagens
+# loop das pastas e imagens
 for label in labels:
     path = f'C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/images/{label}'
 
@@ -42,11 +42,11 @@ for label in labels:
         features = extract_features(image_path, label_value)
         features_list.append(features)
 
-# Nomes das características
+# nomes das características
 features_names = mahotas.features.texture.haralick_labels
 features_names = np.append(features_names, 'Label')
 
-# DataFrame e salvar ele como CSV
+# salvar como CSV
 df = pd.DataFrame(data=features_list, columns=features_names)
 
 output_path = 'C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/features.csv'
