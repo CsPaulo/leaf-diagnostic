@@ -33,21 +33,21 @@ def interpret_and_display_predictions(model, image, features):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    explainer = lime.lime_tabular.LimeTabularExplainer(X_train.values, feature_names=X.columns, class_names=['Saudável', 'Moscas das Galhas'], 
+    explainer = lime.lime_tabular.LimeTabularExplainer(X_train.values, feature_names=X.columns, class_names=['Saudável',  class_names[class_idx]], 
                                                       feature_selection='lasso_path', discretize_continuous=True)
         
     exp = explainer.explain_instance(features.reshape(14,), model.predict_proba, num_features=14)
     
-    st.image(image, caption="", use_column_width=True)
-    
     col1, col2 = st.columns(2)
     
     with col1:
+        st.image(image, caption="", use_column_width=True)
         
-
+    
     with col2:
         st.markdown("<h3 style='text-align: center; color: black;'>Interpretação</h3>", unsafe_allow_html=True)
-        components.html((exp.as_html(predict_proba=False)), height=500)
+        components.html((exp.as_html(predict_proba=False)), width=800, height=500)
+        
 
 # título 
 st.markdown("<h1 style='text-align: center; color: black;'>Aplicação de Diagnóstico de Folhas</h1>", unsafe_allow_html=True)
@@ -79,7 +79,9 @@ if uploaded_images:
 
     for idx, (img, features) in enumerate(images_and_features, start=1):
         prediction_probs = model.predict_proba([features])
-        prediction = "Folha afetada pelas moscas-das-galhas com {:.2%} de certeza".format(prediction_probs[0][1]) if prediction_probs[0][1] > prediction_probs[0][0] else "Folha normal com {:.2%} de certeza".format(prediction_probs[0][0])
+        class_names = ['Saudável', 'Moscas das Galhas', 'Morta', 'Gorgulho']
+        class_idx = np.argmax(prediction_probs)
+        prediction = f"{class_names[class_idx]} com {prediction_probs[0][class_idx] * 100:.2f}% de certeza"
 
         st.markdown(f"<h4 style='text-align: center; color: black;'>Imagem {idx}: {prediction}</h4>", unsafe_allow_html=True)
         

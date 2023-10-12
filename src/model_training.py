@@ -6,17 +6,15 @@ import pandas as pd
 import pickle
 
 def get_metrics(y_true, y_pred):
-    vn, fp, fn, vp = confusion_matrix(y_true, y_pred).ravel()
-    accuracy = (vp + vn) / (vp + fp + fn + vn)
-    recall = vp / (vp + fn)
-    specificity = vn / (vn + fp)
-    precision = vp / (vp + fp)
+    cm = confusion_matrix(y_true, y_pred)
+    accuracy = cm.diagonal().sum() / cm.sum()
+    precision = cm.diagonal() / cm.sum(axis=0)
+    recall = cm.diagonal() / cm.sum(axis=1)
 
     return {
         'accuracy': accuracy,
-        'specificity': specificity,
-        'recall': recall,
         'precision': precision,
+        'recall': recall,
     }
 
 # Carregar os dados
