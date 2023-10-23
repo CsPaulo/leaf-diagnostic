@@ -17,18 +17,20 @@ def get_metrics(y_true, y_pred):
         'recall': recall,
     }
 
-# Carregar os dados
+# carregar os dados
 df = pd.read_csv('C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/features.csv', delimiter=';')
 
 X = df.drop('Label', axis=1)
 y = df['Label']
 
+
 # dados em conjuntos de treinamento e teste
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Aplique SMOTE para lidar com o desbalanceamento de classes
+# SMOTE para lidar com o desbalanceamento de classes
 balanced = SMOTE(random_state=42)
 X_train, y_train = balanced.fit_resample(X_train, y_train)
+
 
 # RandomForestClassifier com GridSearchCV
 rf_params = {

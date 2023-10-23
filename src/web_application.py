@@ -45,12 +45,14 @@ def interpret_and_display_predictions(model, image, features):
         
     
     with col2:
-        st.markdown("<h3 style='text-align: center; color: black;'>Interpretação</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center; color: white;'>Interpretação</h3>", unsafe_allow_html=True)
+        interpretation_text = exp.as_html(predict_proba=False)
+        interpretation_text = interpretation_text.replace("color:#000000;", "color:gray;")
         components.html((exp.as_html(predict_proba=False)), width=800, height=500)
         
 
 # título 
-st.markdown("<h1 style='text-align: center; color: black;'>Aplicação de Diagnóstico de Folhas</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: white;'>Aplicação de Diagnóstico de Folhas</h1>", unsafe_allow_html=True)
 
 # barra lateral para upload de imagens
 st.sidebar.title('Configurações')
@@ -61,7 +63,7 @@ model = get_model()
 if uploaded_images:
     images_and_features = []
     
-    st.markdown("<h3 style='text-align: center; color: black;'>Imagens e Previsões</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: white;'>Imagens e Previsões</h3>", unsafe_allow_html=True)
 
     for uploaded_image in uploaded_images:
         bytes_data = uploaded_image.getvalue()
@@ -79,10 +81,10 @@ if uploaded_images:
 
     for idx, (img, features) in enumerate(images_and_features, start=1):
         prediction_probs = model.predict_proba([features])
-        class_names = ['Saudável', 'Moscas das Galhas', 'Morta', 'Gorgulho']
+        class_names = ['Saudável', 'Moscas das Galhas', 'Morta', 'Gorgulho', 'Antracnose', 'Cancro Bacteriano', 'Oídio', 'Fumagina']
         class_idx = np.argmax(prediction_probs)
         prediction = f"{class_names[class_idx]} com {prediction_probs[0][class_idx] * 100:.2f}% de certeza"
 
-        st.markdown(f"<h4 style='text-align: center; color: black;'>Imagem {idx}: {prediction}</h4>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='text-align: center; color: white'>Imagem {idx}: {prediction}</h4>", unsafe_allow_html=True)
         
         interpret_and_display_predictions(model, img, features)

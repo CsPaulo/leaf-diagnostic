@@ -6,7 +6,7 @@ import cv2
 import os
 
 
-labels = ['Healthy', 'Gall_Midge', 'Die Back', 'Cutting Weevil']
+labels = ['Healthy', 'Gall Midge', 'Die Back', 'Cutting Weevil', 'Anthracnose', 'Bacterial Canker', 'Powdery Mildew', 'Sooty Mould']
 
 # armazena as características
 features_list = []
@@ -35,7 +35,7 @@ for label in labels:
         print(f"Nenhuma imagem encontrada em '{path}'.")
         continue
 
-    label_mapping = {'Healthy': 0, 'Gall_Midge': 1, 'Die Back': 2, 'Cutting Weevil': 3}
+    label_mapping = {'Healthy': 0, 'Gall Midge': 1, 'Die Back': 2, 'Cutting Weevil': 3, 'Anthracnose': 4, 'Bacterial Canker': 5, 'Powdery Mildew': 6, 'Sooty Mould': 7}
     label_value = label_mapping.get(label, -1)
 
     for image_path in images_list:
