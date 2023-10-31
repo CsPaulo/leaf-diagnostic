@@ -1,7 +1,9 @@
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report
 from imblearn.over_sampling import SMOTE
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import pickle
 
@@ -17,40 +19,47 @@ def get_metrics(y_true, y_pred):
         'recall': recall,
     }
 
-# carregar os dados
+# Carregar os dados
 df = pd.read_csv('C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/features.csv', delimiter=';')
 
 X = df.drop('Label', axis=1)
 y = df['Label']
 
-
-# dados em conjuntos de treinamento e teste
+# Dados de treinamento e teste
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # SMOTE para lidar com o desbalanceamento de classes
 balanced = SMOTE(random_state=42)
 X_train, y_train = balanced.fit_resample(X_train, y_train)
 
+# Seleção de características com SelectKBest
+k_best_features = 14
+selector = SelectKBest(f_classif, k=k_best_features)
+X_train_selected = selector.fit_transform(X_train, y_train)
+X_test_selected = selector.transform(X_test)
 
-# RandomForestClassifier com GridSearchCV
-rf_params = {
-    'n_estimators': [100, 300, 500],
-    'max_depth': [None, 10, 20],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4],
-    'max_features': ['sqrt', 'log2'],
+# RandomForestClassifier com hiperparâmetros ajustados
+param_grid = {
+    'n_estimators': 2000,
+    'max_depth': 160,
+    'min_samples_split': 48,
+    'min_samples_leaf': 24,
+    'max_features': 'sqrt',
+    'criterion': 'gini',
+    'bootstrap': True
 }
-rf_grid = GridSearchCV(RandomForestClassifier(random_state=42), rf_params, cv=5, n_jobs=-1)
-rf_grid.fit(X_train, y_train)
-best_rf_model = rf_grid.best_estimator_
-y_rf_pred = best_rf_model.predict(X_test)
+
+rf_model = RandomForestClassifier(**param_grid)
+rf_model.fit(X_train_selected, y_train)
+y_rf_pred = rf_model.predict(X_test_selected)
+
 rf_metrics = get_metrics(y_test, y_rf_pred)
 print("Random Forest Métricas:")
 print(rf_metrics)
 
-# relatório de classificação
-print("Relatório de Classificação Random Forest :")
+# Relatório de Classificação
+print("Relatório de Classificação Random Forest:")
 print(classification_report(y_test, y_rf_pred))
 
-# Salve o modelo treinado
-pickle.dump(best_rf_model, open('C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/best_random_forest_model.dat', 'wb'))
+# Salvar o modelo
+pickle.dump(rf_model, open('C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/best_random_forest_model.dat', 'wb'))
