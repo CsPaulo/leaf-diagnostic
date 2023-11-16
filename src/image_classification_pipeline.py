@@ -8,6 +8,8 @@ import pickle
 from sklearn.svm import SVC
 from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
+import SimpleITK as sitk
+from radiomics import featureextractor
 
 # Função para calcular métricas
 def get_metrics(y_true, y_pred):
@@ -30,10 +32,6 @@ non_numeric_columns = data.select_dtypes(exclude=['number']).columns
 
 # Remova as colunas não numéricas (se necessário)
 data = data.drop(non_numeric_columns, axis=1)
-
-# Certifique-se de que a coluna 'Label' seja numérica (binária) e substitua NaN por 0
-data['Label'] = data['Label'].map({'classe1': 0, 'classe2': 1})  # Substitua com os rótulos reais
-data['Label'] = data['Label'].fillna(0)  # Substitua 0 pelo valor desejado para NaN
 
 # Verifique se há pelo menos duas classes diferentes nos rótulos
 unique_classes = data['Label'].unique()

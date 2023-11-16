@@ -3,7 +3,7 @@ import cv2
 import SimpleITK as sitk
 from radiomics import featureextractor
 import pandas as pd
-
+import numpy as np
 # Defina os rótulos das classes
 labels = {
     'Healthy': 0,
@@ -15,20 +15,18 @@ labels = {
     'Sooty Mould': 6
 }
 
-# Função para extrair características radiômicas de uma pasta de imagens
 def extrair_caracteristicas(pasta, label):
     features_list = []
 
     # Crie o extrator de características Radiomics
-    extractor = featureextractor.RadiomicsFeatureExtractor(shape2d=True)
+    extractor = featureextractor.RadiomicsFeatureExtractor(shape2D=True)
 
     for imagem_nome in os.listdir(pasta):
         if imagem_nome.endswith(".jpg"):
             # Carregue a imagem em escala de cinza
             imagem_path = os.path.join(pasta, imagem_nome)
             image_cv2 = cv2.imread(imagem_path, cv2.IMREAD_GRAYSCALE)
-
-            # Converta para um objeto SimpleITK
+           
             image = sitk.GetImageFromArray(image_cv2)
 
             # Crie uma máscara que cubra toda a imagem
@@ -68,3 +66,5 @@ if all_features:
     # Salve o DataFrame em um arquivo CSV
     output_path = 'C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/features.csv'
     df.to_csv(output_path, index=False, sep=';')
+
+

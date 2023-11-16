@@ -1,11 +1,11 @@
 from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report
 from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import pickle
+import xgboost as xgb
 
 def get_metrics(y_true, y_pred):
     cm = confusion_matrix(y_true, y_pred)
@@ -19,47 +19,44 @@ def get_metrics(y_true, y_pred):
         'recall': recall,
     }
 
-# Carregar os dados
-df = pd.read_csv('C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/features.csv', delimiter=';')
+# Carregue os dados do arquivo CSV
+data = pd.read_csv('C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/features.csv', delimiter=';')
 
-X = df.drop('Label', axis=1)
-y = df['Label']
+# Identifique as colunas não numéricas
+non_numeric_columns = data.select_dtypes(exclude=['number']).columns
 
-# Dados de treinamento e teste
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Remova as colunas não numéricas (se necessário)
+data = data.drop(non_numeric_columns, axis=1)
 
-# SMOTE para lidar com o desbalanceamento de classes
-balanced = SMOTE(random_state=42)
-X_train, y_train = balanced.fit_resample(X_train, y_train)
+# Verifique se há pelo menos duas classes diferentes nos rótulos
+unique_classes = data['Label'].unique()
+if len(unique_classes) < 2:
+    raise ValueError("Número insuficiente de classes nos rótulos.")
 
-# Seleção de características com SelectKBest
-k_best_features = 14
-selector = SelectKBest(f_classif, k=k_best_features)
-X_train_selected = selector.fit_transform(X_train, y_train)
-X_test_selected = selector.transform(X_test)
+# Lide com valores NaN nos rótulos (substitua NaN pelos valores desejados)
+data['Label'] = data['Label'].fillna(0)  # Substitua 0 pelo valor desejado para NaN
 
-# RandomForestClassifier com hiperparâmetros ajustados
-param_grid = {
-    'n_estimators': 2000,
-    'max_depth': 160,
-    'min_samples_split': 48,
-    'min_samples_leaf': 24,
-    'max_features': 'sqrt',
-    'criterion': 'gini',
-    'bootstrap': True
-}
+# Separando X e Y e dividindo em conjunto de treinamento e teste
+X = data.drop('Label', axis=1)
+y = data['Label'].values
 
-rf_model = RandomForestClassifier(**param_grid)
-rf_model.fit(X_train_selected, y_train)
-y_rf_pred = rf_model.predict(X_test_selected)
+# Separando X e Y e dividindo em conjunto de treinamento e teste
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
-rf_metrics = get_metrics(y_test, y_rf_pred)
-print("Random Forest Métricas:")
-print(rf_metrics)
+# Para o XGB
+xgb_model = xgb.XGBClassifier(objective='binary:logistic', max_depth=30, 
+                              colsample_bytree=0.7033, min_child_weight=18, gamma=0.729, 
+                              eta=0.8995, n_estimators=4000, use_label_encoder=False, 
+                              eval_metric='merror')
+xgb_model.fit(X_train, y_train)
+y_pred_xgb = xgb_model.predict(X_test)
+metrics_xgb = get_metrics(y_test, y_pred_xgb)
+print("Métricas para XGBoost:")
+print(metrics_xgb)
 
 # Relatório de Classificação
-print("Relatório de Classificação Random Forest:")
-print(classification_report(y_test, y_rf_pred))
+print("Relatório de Classificação XGBoost:")
+print(classification_report(y_test, y_pred_xgb))
 
 # Salvar o modelo
-pickle.dump(rf_model, open('C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/best_random_forest_model.dat', 'wb'))
+pickle.dump(xgb_model, open('C:/Users/cspau/Desktop/coisas do pc/Aprendendo Python/GitHub/leaf-diagnostic/etc/best_xgboost_model.dat', 'wb'))
