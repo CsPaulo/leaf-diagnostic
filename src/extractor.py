@@ -7,12 +7,8 @@ import numpy as np
 # Defina os rótulos das classes
 labels = {
     'Healthy': 0,
-    'Gall Midge': 1,
-    'Die Back': 2,
-    'Cutting Weevil': 3,
-    'Anthracnose': 4,
-    'Bacterial Canker': 5,
-    'Sooty Mould': 6
+    'Die Back': 1,
+    'Cutting Weevil': 2
 }
 
 def extrair_caracteristicas(imagem):
